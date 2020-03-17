@@ -31,7 +31,7 @@ def create_depth_table_for_metabat2(samples):
 
 def get_samples_for_metabat(wildcards):
     print(wildcards)
-    bam_wc = '{fs_prefix}/{df}/mapped/bwa__0.7.17__def/assembly/megahit__v1.2.9__def/{ass_df}/{sample_set}/final_contigs__{mod}/{sample}/{preproc}/{sample}.jgi_depth'
+    bam_wc = '{fs_prefix}/{df}/mapped/bwa__0.7.17__def/assembly/{ass_df}/{sample_set}/megahit__v1.2.9__def/final_contigs__{mod}/{sample}/{preproc}/{sample}.jgi_depth'
     ss = wildcards.sample_set
 
     table_wc = '{fs_prefix}/{df}/assembly/{sample_set}/sample_set.tsv'
@@ -58,8 +58,8 @@ def get_samples_for_metabat(wildcards):
     return list_of_sample_profiles
 
 rule jgi_sum_depth:
-    input: '{fs_prefix}/{df}/mapped/bwa__0.7.17__{bwa_params}/assembly/megahit__v1.2.9__def/{ass_df}/{sample_set}/final_contigs__{mod}/{sample}/{preproc}/{sample}.bam'
-    output:'{fs_prefix}/{df}/mapped/bwa__0.7.17__{bwa_params}/assembly/megahit__v1.2.9__def/{ass_df}/{sample_set}/final_contigs__{mod}/{sample}/{preproc}/{sample}.jgi_depth'
+    input: '{fs_prefix}/{df}/mapped/bwa__0.7.17__{bwa_params}/assembly/{ass_df}/{sample_set}/megahit__v1.2.9__def/final_contigs__{mod}/{sample}/{preproc}/{sample}.bam'
+    output:'{fs_prefix}/{df}/mapped/bwa__0.7.17__{bwa_params}/assembly/{ass_df}/{sample_set}/megahit__v1.2.9__def/final_contigs__{mod}/{sample}/{preproc}/{sample}.jgi_depth'
     conda: 'metabat2_env.yaml'
     shell: ('jgi_summarize_bam_contig_depths --outputDepth {output} {input}')
 
@@ -83,7 +83,7 @@ rule metabat2_new:
         bin_b = '{fs_prefix}/{df}/binning/metabat2/{df}/{sample_set}/final_contigs__{mod}/bins/',
     log:        '{fs_prefix}/{df}/binning/metabat2/{df}/{sample_set}/final_contigs__{mod}/log.txt'
     benchmark:  '{fs_prefix}/{df}/binning/metabat2/{df}/{sample_set}/final_contigs__{mod}/benchmark.txt'
-    threads: 12
+    threads: 26
     conda: 'metabat2_env.yaml'
     shell: ('''cd {params.wd}; \n
             (metabat2 -t {threads} -i {input.fa} -a {input.depth} -o {params.bin_d}) >{log} 2>&1; \n
