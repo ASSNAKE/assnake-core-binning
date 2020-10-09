@@ -30,8 +30,8 @@ def create_depth_table_for_metabat2(samples):
     return total_depth
 
 def get_samples_for_metabat(wildcards):
-    print(wildcards)
-    bam_wc = '{fs_prefix}/{df}/mapped/bwa__0.7.17__def/assembly/{ass_df}/{sample_set}/megahit__v1.2.9__def/final_contigs__{mod}/{sample}/{preproc}/{sample}.jgi_depth'
+    # print(wildcards)
+    bam_wc = '{fs_prefix}/{df}/mapped/bwa__0.7.17__def/assembly/{ass_df}/{sample_set}/megahit__v1.2.9__def.7380110b/final_contigs__{mod}/{sample}/{preproc}/{sample}.jgi_depth'
     ss = wildcards.sample_set
 
     table_wc = '{fs_prefix}/{df}/assembly/{sample_set}/sample_set.tsv'
@@ -53,13 +53,13 @@ def get_samples_for_metabat(wildcards):
                                     ass_df = wildcards.ass_df,
                                     df=s['df'], 
                                     preproc=s['preproc'],
-                                    sample=s['fs_name']))
+                                    sample=s['df_sample']))
 
     return list_of_sample_profiles
 
 rule jgi_sum_depth:
-    input: '{fs_prefix}/{df}/mapped/bwa__0.7.17__{bwa_params}/assembly/{ass_df}/{sample_set}/megahit__v1.2.9__def/final_contigs__{mod}/{sample}/{preproc}/{sample}.bam'
-    output:'{fs_prefix}/{df}/mapped/bwa__0.7.17__{bwa_params}/assembly/{ass_df}/{sample_set}/megahit__v1.2.9__def/final_contigs__{mod}/{sample}/{preproc}/{sample}.jgi_depth'
+    input: '{fs_prefix}/{df}/mapped/bwa__0.7.17__{bwa_params}/assembly/{ass_df}/{sample_set}/megahit__v1.2.9__def.7380110b/final_contigs__{mod}/{sample}/{preproc}/{sample}.bam'
+    output:'{fs_prefix}/{df}/mapped/bwa__0.7.17__{bwa_params}/assembly/{ass_df}/{sample_set}/megahit__v1.2.9__def.7380110b/final_contigs__{mod}/{sample}/{preproc}/{sample}.jgi_depth'
     conda: 'metabat2_env.yaml'
     shell: ('jgi_summarize_bam_contig_depths --outputDepth {output} {input}')
 
@@ -68,12 +68,12 @@ rule depth_file:
     output: '{fs_prefix}/{df}/binning/metabat2/{ass_df}/{sample_set}/final_contigs__{mod}/depth.tsv'
     run: 
         depth = create_depth_table_for_metabat2(input)
-        print(output)
+        # print(output)
         depth.to_csv(str(output), sep='\t', index=False)
 
 rule metabat2_new:
     input:
-        fa    = '{fs_prefix}/{df}/assembly/{sample_set}/megahit__v1.2.9__def/final_contigs__{mod}.fa',
+        fa    = '{fs_prefix}/{df}/assembly/{sample_set}/megahit__v1.2.9__def.7380110b/final_contigs__{mod}.fa',
         depth = '{fs_prefix}/{df}/binning/metabat2/{df}/{sample_set}/final_contigs__{mod}/depth.tsv'
     output:
         done  = '{fs_prefix}/{df}/binning/metabat2/{df}/{sample_set}/final_contigs__{mod}/metabat2.done'
@@ -83,7 +83,7 @@ rule metabat2_new:
         bin_b = '{fs_prefix}/{df}/binning/metabat2/{df}/{sample_set}/final_contigs__{mod}/bins/',
     log:        '{fs_prefix}/{df}/binning/metabat2/{df}/{sample_set}/final_contigs__{mod}/log.txt'
     benchmark:  '{fs_prefix}/{df}/binning/metabat2/{df}/{sample_set}/final_contigs__{mod}/benchmark.txt'
-    threads: 26
+    threads: 10
     conda: 'metabat2_env.yaml'
     shell: ('''cd {params.wd}; \n
             (metabat2 -t {threads} -i {input.fa} -a {input.depth} -o {params.bin_d}) >{log} 2>&1; \n
@@ -91,18 +91,18 @@ rule metabat2_new:
             for f in *.fa; do i="${{f%.fa}}"; mv $f ${{i//./_}}.fa; done; \n
             touch {output.done}''')
 
-def external_binning():
-    bins_wc = '/data10/bio/metagenomics/FHM/metabat2/bwa__def/mh__def/D2/1000/bins/{binn}.fa'
-    bins = [b.split('/')[-1][0:-3] for b in glob.glob(bins_wc.format(binn = '*'))]
+# def external_binning():
+#     bins_wc = '/data10/bio/metagenomics/FHM/metabat2/bwa__def/mh__def/D2/1000/bins/{binn}.fa'
+#     bins = [b.split('/')[-1][0:-3] for b in glob.glob(bins_wc.format(binn = '*'))]
 
-    bb = []
-    bins_info = []
-    for i, b in enumerate(bins):
-        with open(bins_wc.format(binn = b), 'r') as contigs:
-            for line in contigs:
-                if line[0] == '>':
-                    bb.append({ 'contig': line[1:-1], 'bin':b.replace('.', '_')})
+#     bb = []
+#     bins_info = []
+#     for i, b in enumerate(bins):
+#         with open(bins_wc.format(binn = b), 'r') as contigs:
+#             for line in contigs:
+#                 if line[0] == '>':
+#                     bb.append({ 'contig': line[1:-1], 'bin':b.replace('.', '_')})
                     
-    external_binning_of_contigs = '/data10/bio/metagenomics/FHM/metabat2/bwa__def/mh__def/D2/1000/external_binning_of_contigs.tsv'
-    external_binning = pd.DataFrame(bb, columns=['contig', 'bin'])
-    external_binning.to_csv(external_binning_of_contigs, index = None, header=False, sep='\t')
+#     external_binning_of_contigs = '/data10/bio/metagenomics/FHM/metabat2/bwa__def/mh__def/D2/1000/external_binning_of_contigs.tsv'
+#     external_binning = pd.DataFrame(bb, columns=['contig', 'bin'])
+#     external_binning.to_csv(external_binning_of_contigs, index = None, header=False, sep='\t')

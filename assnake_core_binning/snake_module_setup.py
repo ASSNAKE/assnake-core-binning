@@ -1,7 +1,7 @@
 import os
 import assnake
 # from assnake_core_assembly.megahit.cmd_megahit import megahit_invocation
-from assnake.utils import read_yaml
+from assnake.utils.general import read_yaml
 from assnake_core_binning.checkm.invocation_commands import chekcm_invocation
 from assnake_core_binning.metabat2.invocation_commands import metabat2_invocation
 

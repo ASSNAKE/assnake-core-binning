@@ -10,8 +10,9 @@ rule check_m:
         bin_folder = '{fs_prefix}/{df}/binning/metabat2/{df}/{sample_set}/final_contigs__{mod}/bins',
     log:           '{fs_prefix}/{df}/binning/metabat2/{df}/{sample_set}/final_contigs__{mod}checkm-log.txt'
     benchmark:      '{fs_prefix}/{df}/binning/metabat2/{df}/{sample_set}/final_contigs__{mod}checkm-benchmark.txt'
-    threads: 20
+    threads: 10
     conda: 'checkm_env.yaml'
-    shell: ('''echo {CHECKM} | checkm data setRoot {CHECKM}; \n
-        (checkm lineage_wf -t {threads} -x fa {params.bin_folder} {params.wd}) >{log} 2>&1; \n
+    shell: ('''(checkm lineage_wf -t {threads} -x fa {params.bin_folder} {params.wd}) >{log} 2>&1; \n
         touch {output.done}''')
+
+# echo {CHECKM} | checkm data setRoot {CHECKM}; \n
